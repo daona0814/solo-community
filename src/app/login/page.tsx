@@ -7,8 +7,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [msg, setMsg] = useState('');
 
-  const sendMagicLink = async (e:any) => {
-    e.preventDefault();
+ const sendMagicLink = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
     setMsg('메일 보내는 중...');
     const { error } = await supabase.auth.signInWithOtp({
       email,

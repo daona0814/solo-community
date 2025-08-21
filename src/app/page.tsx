@@ -1,11 +1,14 @@
 import { supabase } from '@/lib/supabase';
+type PostRow = { id: number; title: string; created_at: string };
 
 export default async function Home() {
-  const { data: posts, error } = await supabase
+  const { data, error } = await supabase
     .from('posts')
     .select('id,title,created_at')
     .order('id', { ascending: false })
     .limit(50);
+
+  const posts = (data ?? []) as PostRow[];
 
   if (error) {
     return <main className="max-w-xl mx-auto p-4">에러: {error.message}</main>;
@@ -18,8 +21,8 @@ export default async function Home() {
         <a className="underline" href="/login">로그인</a>
         <a className="underline" href="/write">글쓰기</a>
       </div>
-      <ul className="space-y-3 mt-4">
-        {(posts ?? []).map((p:any) => (
+     <ul className="space-y-3 mt-4">
+       {posts.map((p: PostRow) => (
           <li key={p.id} className="border rounded p-3">
             <a href={`/post/${p.id}`} className="font-medium">{p.title}</a>
             <div className="text-xs text-gray-500">

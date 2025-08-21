@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import PostComments from './post-comments';
 
@@ -18,7 +19,7 @@ export default async function PostDetail({ params }: { params: { id: string } })
 
   return (
     <main className="max-w-xl mx-auto p-4">
-      <a href="/" className="underline text-sm">← 목록</a>
+      <Link href="/" className="underline text-sm">← 목록</Link>
       <h1 className="text-2xl font-bold mt-2">{post.title}</h1>
       <div className="text-xs text-gray-500 mb-4">
         {new Date(post.created_at).toLocaleString('ko-KR')}

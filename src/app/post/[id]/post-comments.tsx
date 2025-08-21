@@ -1,48 +1,50 @@
 'use client';
-
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
+type CommentRow = { id: number; body: string; created_at: string };
+
 export default function PostComments({ postId }: { postId: number }) {
-  const [comments, setComments] = useState<any[]>([]);
+  const [comments, setComments] = useState<CommentRow[]>([]);
   const [body, setBody] = useState('');
   const [msg, setMsg] = useState('');
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string } | null>(null);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     const { data, error } = await supabase
       .from('comments')
       .select('id,body,created_at')
       .eq('post_id', postId)
       .order('id', { ascending: false });
-    if (!error) setComments(data || []);
-  };
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
-    load();
+    if (!error) setComments((data as CommentRow[]) ?? []);
   }, [postId]);
 
-  const onSubmit = async (e:any) => {
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user ?? null);
+      await load();
+    })();
+  }, [load]);
+
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) { setMsg('로그인이 필요합니다.'); return; }
     if (!body.trim()) return;
 
     setMsg('저장 중...');
     const { error } = await supabase.from('comments').insert({
-      post_id: postId,
-      user_id: user.id,
-      body
+      post_id: postId, user_id: user.id, body
     });
     if (error) setMsg('에러: ' + error.message);
-    else { setMsg('저장 완료!'); setBody(''); load(); }
+    else { setMsg('저장 완료!'); setBody(''); await load(); }
   };
 
-  const onDelete = async (id:number) => {
+  const onDelete = async (id: number) => {
     setMsg('삭제 중...');
     const { error } = await supabase.from('comments').delete().eq('id', id);
     if (error) setMsg('에러: ' + error.message);
-    else { setMsg('삭제 완료!'); load(); }
+    else { setMsg('삭제 완료!'); await load(); }
   };
 
   return (

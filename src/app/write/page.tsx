@@ -13,8 +13,8 @@ export default function WritePage() {
     supabase.auth.getUser().then(({ data }) => setIsAuthed(!!data.user));
   }, []);
 
-  const onSubmit = async (e:any) => {
-    e.preventDefault();
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
     setMsg('저장 중...');
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { setMsg('로그인이 필요합니다.'); return; }
